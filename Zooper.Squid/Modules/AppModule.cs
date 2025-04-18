@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
+using Zooper.Squid.Extensions;
 
 namespace Zooper.Squid.Modules;
 
