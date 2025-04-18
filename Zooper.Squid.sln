@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zooper.Squid", "Zooper.Squid\Zooper.Squid.csproj", "{8D08D847-8897-46BE-9AD4-1A64B0DE396E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8D08D847-8897-46BE-9AD4-1A64B0DE396E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D08D847-8897-46BE-9AD4-1A64B0DE396E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D08D847-8897-46BE-9AD4-1A64B0DE396E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D08D847-8897-46BE-9AD4-1A64B0DE396E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
