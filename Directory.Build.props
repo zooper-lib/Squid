@@ -11,10 +11,8 @@
         <PackageTags>aspnetcore;modules;modular;architecture;dependency;injection;DI;.NET</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <Description>A .NET library for creating modular ASP.NET Core applications with easy module registration and configuration.</Description>
-        <PackageId>Zooper.Squid</PackageId>
-
-        <!-- Version information -->
-        <Version>1.0.0</Version>
+        <PackageId>Zooper.Squid</PackageId>        <!-- Version information -->
+        <Version>2.0.0</Version>
 
         <!-- Source linking -->
         <PublishRepositoryUrl>true</PublishRepositoryUrl>

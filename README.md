@@ -10,8 +10,10 @@ Zooper.Squid is a lightweight .NET library that simplifies the creation of modul
 ## Key Features
 
 - **Modular Architecture**: Break down your application into independent, focused modules
+- **Separation of Concerns**: Distinct service and middleware module interfaces
+- **Explicit Middleware Ordering**: Full control over middleware pipeline execution order
 - **Easy Configuration**: Simple and intuitive module registration and configuration
-- **Dependency Injection**: Automatic registration of modules in your DI container
+- **Dependency Injection**: Automatic registration of service modules in your DI container
 - **Flexible Composition**: Mix and match modules to build your application
 - **Minimal Dependencies**: Only depends on ASP.NET Core
 - **Type-safe**: Leverages C#'s type system for robust module definitions
@@ -28,16 +30,20 @@ dotnet add package Zooper.Squid
 Here's a basic example of creating a modular ASP.NET Core application with Zooper.Squid:
 
 ```csharp
-// Define your module (in your modules layer)
-public class UserModule : AppModule
+// Define your service module
+public class UserServiceModule : IServiceModule
 {
-    public override void ConfigureServices(WebApplicationBuilder builder)
+    public void ConfigureServices(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
     }
+}
 
-    public override void ConfigureMiddleware(WebApplication app)
+// Define your middleware module
+public class UserMiddlewareModule : IMiddlewareModule
+{
+    public void ConfigureMiddleware(WebApplication app)
     {
         app.MapControllers();
     }
@@ -46,33 +52,49 @@ public class UserModule : AppModule
 // Register modules in your Program.cs
 var builder = WebApplication.CreateBuilder(args);
 
-// Register your modules
-builder.AddModules(typeof(UserModule));
+// Register your service modules
+builder.AddServiceModules(
+    typeof(UserServiceModule),
+    typeof(AuthenticationServiceModule)
+);
 
 var app = builder.Build();
 
-// Configure your modules
-app.UseModules();
+// Configure middleware pipeline with explicit ordering
+app.ConfigureMiddlewarePipeline()
+    .AddModule<AuthenticationMiddlewareModule>() // Authentication first
+    .Add(app => app.UseRouting())                // Then routing
+    .AddModule<UserMiddlewareModule>()           // Then user endpoints
+    .Build();
 
 app.Run();
 ```
 
 ## Core Concepts
 
-### Modules
+### Service Modules
 
-Modules are self-contained units of functionality that can be independently developed, tested, and deployed:
+Service modules handle dependency injection configuration and are completely separate from middleware concerns:
 
 ```csharp
-public class AuthenticationModule : AppModule
+public class AuthenticationServiceModule : IServiceModule
 {
-    public override void ConfigureServices(WebApplicationBuilder builder)
+    public void ConfigureServices(WebApplicationBuilder builder)
     {
         builder.Services.AddAuthentication();
         builder.Services.AddAuthorization();
     }
+}
+```
 
-    public override void ConfigureMiddleware(WebApplication app)
+### Middleware Modules
+
+Middleware modules handle the request pipeline configuration:
+
+```csharp
+public class AuthenticationMiddlewareModule : IMiddlewareModule
+{
+    public void ConfigureMiddleware(WebApplication app)
     {
         app.UseAuthentication();
         app.UseAuthorization();
@@ -80,19 +102,32 @@ public class AuthenticationModule : AppModule
 }
 ```
 
-### Module Registration
+### Explicit Middleware Ordering
 
-Zooper.Squid provides a simple way to register your modules:
+The middleware pipeline builder allows you to explicitly control the order of middleware execution:
 
 ```csharp
-// Register a single module
-builder.AddModules(typeof(AuthenticationModule));
+app.ConfigureMiddlewarePipeline()
+    .Add(app => app.UseExceptionHandler("/Error"))  // Exception handling first
+    .AddModule<AuthenticationMiddlewareModule>()    // Then authentication
+    .Add(app => app.UseRouting())                   // Then routing
+    .AddModule<ApiMiddlewareModule>()               // Then API endpoints
+    .Build();
+```
 
-// Register multiple modules
-builder.AddModules(
-    typeof(AuthenticationModule),
-    typeof(UserModule),
-    typeof(LoggingModule)
+### Module Registration
+
+Zooper.Squid provides a simple way to register your service modules:
+
+```csharp
+// Register a single service module
+builder.AddServiceModules(typeof(AuthenticationServiceModule));
+
+// Register multiple service modules
+builder.AddServiceModules(
+    typeof(AuthenticationServiceModule),
+    typeof(UserServiceModule),
+    typeof(LoggingServiceModule)
 );
 ```
 
@@ -101,16 +136,17 @@ builder.AddModules(
 ### Module Design
 
 1. **Single Responsibility**: Each module should have a single, well-defined purpose
-2. **Encapsulation**: Modules should encapsulate their implementation details
+2. **Separation of Concerns**: Keep service configuration separate from middleware configuration
 3. **Clear Boundaries**: Define clear boundaries between modules
 4. **Minimal Dependencies**: Keep inter-module dependencies to a minimum
 
 ### Module Implementation
 
-1. **Configuration**: Use ConfigureServices for service registration
-2. **Middleware**: Use ConfigureMiddleware for pipeline configuration
-3. **Dependencies**: Use constructor injection for module dependencies
-4. **Error Handling**: Implement proper error handling within modules
+1. **Service Modules**: Use IServiceModule for dependency injection configuration
+2. **Middleware Modules**: Use IMiddlewareModule for request pipeline configuration
+3. **Explicit Ordering**: Use the middleware pipeline builder for explicit middleware ordering
+4. **Dependencies**: Use constructor injection for module dependencies
+5. **Error Handling**: Implement proper error handling within modules
 
 ### Testing
 
@@ -120,13 +156,13 @@ builder.AddModules(
 
 ## Examples
 
-Check out the [Zooper.Squid.Examples](./Zooper.Squid.Examples) project for comprehensive examples including:
+Check out the examples in the `Zooper.Squid/Examples` folder for comprehensive examples including:
 
-- Authentication module
-- User management module
-- Logging module
-- API module
-- Different module configurations
+- Service and middleware module separation
+- Authentication service and middleware modules
+- Development tools modules
+- Explicit middleware pipeline configuration
+- Module usage patterns
 
 ## Contributing
 
